@@ -1,23 +1,38 @@
-// ============================================
-// app.js - Express Application Setup
-// ============================================
-// Configures the Express app with CORS, body parsing,
-// API routes, and error handling.
-// ============================================
-
 import express from 'express';
 import cors from 'cors';
 import routes from './routes/index.js';
-import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
+import {
+  errorHandler,
+  notFoundHandler
+} from './middleware/error.middleware.js';
 
-const app = express(); // Express app instance (Express.js: Application Setup)
+const app = express();
 
-// --- Middleware ---
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' })); // CORS middleware (Express.js: Middleware)
-app.use(express.json({ limit: '10mb' })); // JSON body parser (Express.js: Middleware)
+// --- CORS Configuration ---
+const allowedOrigins = [
+  'https://abi-resume-builder.netlify.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests without an Origin header, such as server-to-server requests
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// --- Body Parsing ---
+app.use(express.json({ limit: '10mb' }));
 
 // --- Routes ---
-app.use('/api', routes); // Route mounting (Express.js: Route Organization)
+app.use('/api', routes);
 
 // --- Error Handling ---
 app.use(notFoundHandler);
