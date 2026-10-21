@@ -31,6 +31,15 @@ app.use(cors({
 // --- Body Parsing ---
 app.use(express.json({ limit: '10mb' }));
 
+/* Health check endpoint for uptime monitoring */
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    message: 'Resume Builder API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // --- Routes ---
 app.use('/api', routes);
 
